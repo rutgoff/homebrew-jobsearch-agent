@@ -10,9 +10,11 @@ NO_KEY="No download key. Ask Rowena for your key, then run: brew jobsearch-key"
 REFUSED="Your download key was refused. Ask Rowena for a new key."
 
 work=$(mktemp -d)
-python3 -I test/fake_server.py 8765 "$VALID" "$work/server.log" &
+python3 -I test/fake_server.py 8765 "$VALID" "$work/server.log" "http://127.0.0.1:8766/jobsearch/other.whl" &
 server=$!
-trap 'kill "$server" 2>/dev/null; rm -rf "$work"' EXIT
+python3 -I test/fake_server.py 8766 "$VALID" "$work/other.log" &
+other=$!
+trap 'kill "$server" "$other" 2>/dev/null; rm -rf "$work"' EXIT
 sleep 1
 
 passed=0
@@ -59,6 +61,16 @@ make_home valid "$VALID"
 out=$(in_home valid ruby -v test/fetch_check.rb "$URL")
 expect "valid key: the file" grep -qF "OK job_search_agent-1.2.0-py3-none-any.whl" <<<"$out"
 expect "valid key: not in the output" test "$(grep -cF "$VALID" <<<"$out")" -eq 0
+
+BROKEN="http://127.0.0.1:8765/jobsearch/job_search_agent-1.2.0-broken-py3-none-any.whl"
+out=$(HOMEBREW_CURL_VERBOSE=1 in_home valid ruby test/fetch_check.rb "$BROKEN")
+expect "curl verbose: the error has the request headers" grep -qF "> X-Jobsearch-Key: " <<<"$out"
+expect "curl verbose: the key is not in the error" test "$(grep -cF "$VALID" <<<"$out")" -eq 0
+
+REDIRECT="http://127.0.0.1:8765/jobsearch/job_search_agent-1.2.0-redirect-py3-none-any.whl"
+out=$(in_home valid ruby test/fetch_check.rb "$REDIRECT")
+expect "redirect: the download stops" grep -qF "Maximum (0) redirects followed" <<<"$out"
+expect "redirect: the other host gets no request" test ! -s "$work/other.log"
 
 make_home cmd
 key_file="$work/cmd/.config/jobsearch/download-key"

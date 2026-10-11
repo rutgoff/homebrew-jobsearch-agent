@@ -4,8 +4,7 @@
 require "download_strategy"
 
 # Downloads a jobsearch release with the tester's download key.
-# The key file holds the header line, so curl reads the key from the file:
-# the key is never in a command line or in Homebrew's output.
+# Curl reads the key header from the key file and follows no redirect; Homebrew redacts the key in curl's output.
 class JobsearchKeyDownloadStrategy < NoUnzipCurlDownloadStrategy
   KEY_LINE = /\AX-Jobsearch-Key: [A-Za-z0-9_-]{32}\n?\z/
   NO_KEY = "No download key. Ask Rowena for your key, then run: brew jobsearch-key"
@@ -35,5 +34,29 @@ class JobsearchKeyDownloadStrategy < NoUnzipCurlDownloadStrategy
   end
 
   sig { returns(T::Array[String]) }
-  def _curl_args = [*super, "--header", "@#{self.class.key_file}"]
+  def _curl_args = [*super, "--max-redirs", "0", "--header", "@#{self.class.key_file}"]
+
+  sig { override.params(args: String, options: T.untyped).returns(SystemCommand::Result) }
+  def curl_output(*args, **options)
+    super(*args, **options, secrets: secrets_with_key(options))
+  end
+
+  sig {
+    override.params(args: String, print_stdout: T.any(T::Boolean, Symbol), options: T.untyped)
+            .returns(SystemCommand::Result)
+  }
+  def curl(*args, print_stdout: true, **options)
+    super(*args, print_stdout:, **options, secrets: secrets_with_key(options))
+  end
+
+  private
+
+  # The secrets of the curl call plus the saved key (for example, `HOMEBREW_CURL_VERBOSE` prints the request headers).
+  sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Array[String]) }
+  def secrets_with_key(options)
+    key = self.class.key_file.read[/\AX-Jobsearch-Key: (\S+)/, 1]
+    [*options[:secrets], *key]
+  rescue SystemCallError
+    Array(options[:secrets])
+  end
 end

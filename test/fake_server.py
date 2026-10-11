@@ -4,6 +4,7 @@ import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 PORT, VALID, LOG = int(sys.argv[1]), sys.argv[2], sys.argv[3]
+REDIRECT = sys.argv[4] if len(sys.argv) > 4 else ""
 BODY = b"PK\x03\x04 test file"
 
 
@@ -19,8 +20,15 @@ class Handler(BaseHTTPRequestHandler):
             log.write(
                 f"{self.command} {self.path} {'valid' if key == VALID else 'refused'}\n"
             )
-        payload = BODY if ok else b"Forbidden"
-        self.send_response(200 if ok else 403)
+        if ok and REDIRECT and "redirect" in self.path:  # a redirect to another host
+            self.send_response(302)
+            self.send_header("Location", REDIRECT)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        status = (500 if "broken" in self.path else 200) if ok else 403
+        payload = BODY if status == 200 else b"Error"
+        self.send_response(status)
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         if send_body:
