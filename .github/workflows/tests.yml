@@ -23,8 +23,9 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@eb02c69dbabdb66ff183c614f4ce7ab3c077592c # main on 2026-10-10
 
       - name: Style and audit
+        # Ruby only: `brew style rutgoff/jobsearch` also runs shellcheck --enable=all on test/run.sh.
         run: |
-          brew style rutgoff/jobsearch
+          brew style lib cmd Formula test/fetch_check.rb test/key_command_check.rb
           brew audit --strict --tap=rutgoff/jobsearch
 
       - name: Check the download and the key command (fake server, no AWS)

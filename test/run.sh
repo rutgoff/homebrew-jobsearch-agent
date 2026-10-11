@@ -99,5 +99,9 @@ expect "README: tap, trust, key, install" test "$steps" = "brew tap,brew trust,b
 unpinned=$(grep -hE '^[[:space:]]*(- )?uses: ' .github/workflows/*.yml | grep -cvE '@[0-9a-f]{40}([[:space:]]|$)')
 expect "CI: every action pinned to a commit" test "$unpinned" -eq 0
 
+# `brew style` on the whole tap also runs shellcheck --enable=all, shfmt, and actionlint; this script does not pass them.
+style=$(sed -n 's/^[[:space:]]*brew style //p' .github/workflows/tests.yml)
+expect "CI: brew style gets only the Ruby paths" test "$style" = "lib cmd Formula test/fetch_check.rb test/key_command_check.rb"
+
 echo "$passed passed, $failed failed"
 test "$failed" -eq 0
