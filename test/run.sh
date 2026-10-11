@@ -76,5 +76,11 @@ expect "bad key: the message" grep -qF "That is not a download key" <<<"$out"
 expect "bad key: exit 1" test "$status" -eq 1
 expect "bad key: the file stays" test "$(cat "$key_file")" = "X-Jobsearch-Key: $VALID"
 
+steps=$(grep -E '^[[:space:]]*brew (tap|trust|jobsearch-key|install)( |$)' README.md | awk '{print $1, $2}' | tr '\n' ',')
+expect "README: tap, trust, key, install" test "$steps" = "brew tap,brew trust,brew jobsearch-key,brew install,"
+
+unpinned=$(grep -hE '^[[:space:]]*(- )?uses: ' .github/workflows/*.yml | grep -cvE '@[0-9a-f]{40}([[:space:]]|$)')
+expect "CI: every action pinned to a commit" test "$unpinned" -eq 0
+
 echo "$passed passed, $failed failed"
 test "$failed" -eq 0

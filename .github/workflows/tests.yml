@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Checks (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Homebrew (it taps and trusts this repo)
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@eb02c69dbabdb66ff183c614f4ce7ab3c077592c # main on 2026-10-10
+
+      - name: Style and audit
+        run: |
+          brew style rutgoff/jobsearch
+          brew audit --strict --tap=rutgoff/jobsearch
+
+      - name: Check the download and the key command (fake server, no AWS)
+        run: bash test/run.sh
+
+      - name: Find the release
+        id: release
+        run: |
+          if grep -Eq 'sha256 "0{64}"' Formula/jobsearch.rb; then
+            echo "found=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=yes" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save the CI download key
+        if: steps.release.outputs.found == 'yes'
+        env:
+          JOBSEARCH_CI_KEY: ${{ secrets.JOBSEARCH_CI_KEY }}
+        run: printf '%s\n' "$JOBSEARCH_CI_KEY" | brew jobsearch-key
+
+      - name: Install
+        if: steps.release.outputs.found == 'yes'
+        run: brew install rutgoff/jobsearch/jobsearch
+
+      - name: Test
+        if: steps.release.outputs.found == 'yes'
+        run: |
+          brew test rutgoff/jobsearch/jobsearch
+          jobsearch version
+
+      - name: Check the pinned versions
+        if: steps.release.outputs.found == 'yes'
+        run: '"$(brew --prefix jobsearch)/libexec/bin/python" test/check_pins.py "$(brew --cache jobsearch)"'
