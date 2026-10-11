@@ -62,6 +62,11 @@ out=$(in_home valid ruby -v test/fetch_check.rb "$URL")
 expect "valid key: the file" grep -qF "OK job_search_agent-1.2.0-py3-none-any.whl" <<<"$out"
 expect "valid key: not in the output" test "$(grep -cF "$VALID" <<<"$out")" -eq 0
 
+make_home verbose "$VALID"
+out=$(in_home verbose ruby test/fetch_check.rb "$URL" verbose-debug)
+expect "verbose and debug: the curl command line prints" grep -qF "@$work/verbose/.config/jobsearch/download-key" <<<"$out"
+expect "verbose and debug: the key is not in it" test "$(grep -cF "$VALID" <<<"$out")" -eq 0
+
 BROKEN="http://127.0.0.1:8765/jobsearch/job_search_agent-1.2.0-broken-py3-none-any.whl"
 out=$(HOMEBREW_CURL_VERBOSE=1 in_home valid ruby test/fetch_check.rb "$BROKEN")
 expect "curl verbose: the error has the request headers" grep -qF "> X-Jobsearch-Key: " <<<"$out"
