@@ -57,7 +57,7 @@ rm ~/.config/jobsearch/download-key
 | You see | Do this |
 |---|---|
 | `No download key. Ask Rowena for your key, then run: brew jobsearch-key` | Run `brew jobsearch-key` and paste your key. |
-| `Your download key was refused. Ask Rowena for a new key.` | Ask Rowena for a new key. Then run `brew jobsearch-key` again. |
+| `Your download key was refused. Ask Rowena for a new key.` | If you got the key less than 1 minute ago, wait 1 minute and run the install again: a new key needs up to 1 minute to work. If it still fails, ask Rowena for a new key. Then run `brew jobsearch-key` again. |
 | `Refusing to load ... from untrusted tap rutgoff/jobsearch-agent` | Run `brew trust rutgoff/jobsearch-agent`. |
 | `That is not a download key.` | Copy the full key again: 32 characters, no spaces. |
 | Another error | Send Rowena the last 20 lines of the Terminal output. Do not send your key. |
