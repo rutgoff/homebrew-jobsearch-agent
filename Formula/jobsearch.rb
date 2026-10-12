@@ -5,7 +5,7 @@ class Jobsearch < Formula
   homepage "https://github.com/rutgoff/job-search-agent-preview"
   url "https://software.utgoff.org/jobsearch/job_search_agent-1.2.0-py3-none-any.whl",
       using: JobsearchKeyDownloadStrategy
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "eca09203b6d3b6a928c8d55c40bcda4707a8ecbfc57202fccf32805d4942aa20"
   license "MIT"
 
   depends_on "uv" => :build
