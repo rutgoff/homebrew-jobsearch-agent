@@ -80,6 +80,8 @@ expect "redirect: the other host gets no request" test ! -s "$work/other.log"
 make_home cmd
 key_file="$work/cmd/.config/jobsearch/download-key"
 out=$(printf '%s\n' "$VALID" | in_home cmd ruby test/key_command_check.rb)
+expect "key command: executable (brew runs only executable tap commands)" test -x cmd/jobsearch-key.rb
+expect "key command: executable in git" test "$(git ls-files -s cmd/jobsearch-key.rb | cut -d ' ' -f 1)" = 100755
 expect "key command: the next step names the full formula" grep -qF "Next: brew install rutgoff/jobsearch-agent/jobsearch" <<<"$out"
 expect "key command: the header line" test "$(cat "$key_file")" = "X-Jobsearch-Key: $VALID"
 expect "key command: mode 600" test "$(mode "$key_file")" = "0o600"

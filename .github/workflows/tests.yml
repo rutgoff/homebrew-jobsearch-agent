@@ -31,6 +31,9 @@ jobs:
       - name: Check the download and the key command (fake server, no AWS)
         run: bash test/run.sh
 
+      - name: Check that brew finds the key command
+        run: brew jobsearch-key --help
+
       - name: Find the release
         id: release
         run: |
