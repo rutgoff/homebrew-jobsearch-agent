@@ -23,10 +23,10 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@eb02c69dbabdb66ff183c614f4ce7ab3c077592c # main on 2026-10-10
 
       - name: Style and audit
-        # Ruby only: `brew style rutgoff/jobsearch` also runs shellcheck --enable=all on test/run.sh.
+        # Ruby only: `brew style rutgoff/jobsearch-agent` also runs shellcheck --enable=all on test/run.sh.
         run: |
           brew style lib cmd Formula test/fetch_check.rb test/key_command_check.rb
-          brew audit --strict --tap=rutgoff/jobsearch
+          brew audit --strict --tap=rutgoff/jobsearch-agent
 
       - name: Check the download and the key command (fake server, no AWS)
         run: bash test/run.sh
@@ -48,14 +48,14 @@ jobs:
 
       - name: Install
         if: steps.release.outputs.found == 'yes'
-        run: brew install rutgoff/jobsearch/jobsearch
+        run: brew install rutgoff/jobsearch-agent/jobsearch
 
       - name: Test
         if: steps.release.outputs.found == 'yes'
         run: |
-          brew test rutgoff/jobsearch/jobsearch
+          brew test rutgoff/jobsearch-agent/jobsearch
           jobsearch version
 
       - name: Check the pinned versions
         if: steps.release.outputs.found == 'yes'
-        run: '"$(brew --prefix jobsearch)/libexec/bin/python" test/check_pins.py "$(brew --cache jobsearch)"'
+        run: '"$(brew --prefix rutgoff/jobsearch-agent/jobsearch)/libexec/bin/python" test/check_pins.py "$(brew --cache rutgoff/jobsearch-agent/jobsearch)"'

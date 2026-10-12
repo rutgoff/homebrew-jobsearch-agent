@@ -20,13 +20,14 @@
 3. Run these 4 commands, 1 at a time:
 
    ```bash
-   brew tap rutgoff/jobsearch
-   brew trust rutgoff/jobsearch
+   brew tap rutgoff/jobsearch-agent
+   brew trust rutgoff/jobsearch-agent
    brew jobsearch-key
-   brew install jobsearch
+   brew install rutgoff/jobsearch-agent/jobsearch
    ```
 
    - `brew trust` lets Homebrew use this tap.
+   - The full name `rutgoff/jobsearch-agent/jobsearch` makes sure that Homebrew installs this app, not another formula with the same short name.
    - `brew jobsearch-key` asks for your key. Paste the key and push Return. The key does not show on the screen.
 
 4. Check the install: `jobsearch version` shows the version.
@@ -36,16 +37,20 @@ Then set up the app with the guide that Rowena sends you.
 ## Update
 
 ```bash
-brew upgrade jobsearch
+brew upgrade rutgoff/jobsearch-agent/jobsearch
 ```
 
 ## Remove
 
 ```bash
-brew uninstall jobsearch
+brew uninstall rutgoff/jobsearch-agent/jobsearch
 ```
 
-Your settings and data stay in `~/.config/jobsearch` and `~/.local/share/jobsearch`.
+Your settings and data stay in `~/.config/jobsearch` and `~/.local/share/jobsearch`. At the end of the test, also delete your download key:
+
+```bash
+rm ~/.config/jobsearch/download-key
+```
 
 ## Problems
 
@@ -53,7 +58,7 @@ Your settings and data stay in `~/.config/jobsearch` and `~/.local/share/jobsear
 |---|---|
 | `No download key. Ask Rowena for your key, then run: brew jobsearch-key` | Run `brew jobsearch-key` and paste your key. |
 | `Your download key was refused. Ask Rowena for a new key.` | Ask Rowena for a new key. Then run `brew jobsearch-key` again. |
-| `Refusing to load ... from untrusted tap rutgoff/jobsearch` | Run `brew trust rutgoff/jobsearch`. |
+| `Refusing to load ... from untrusted tap rutgoff/jobsearch-agent` | Run `brew trust rutgoff/jobsearch-agent`. |
 | `That is not a download key.` | Copy the full key again: 32 characters, no spaces. |
 | Another error | Send Rowena the last 20 lines of the Terminal output. Do not send your key. |
 

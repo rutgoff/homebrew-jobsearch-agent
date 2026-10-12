@@ -6,14 +6,14 @@ require "io/console"
 
 module Homebrew
   module Cmd
-    # `brew jobsearch-key`: save the tester's download key for `brew install jobsearch`.
+    # `brew jobsearch-key`: save the tester's download key for `brew install rutgoff/jobsearch-agent/jobsearch`.
     class JobsearchKey < AbstractCommand
       KEY = /\A[A-Za-z0-9_-]{32}\z/
 
       cmd_args do
         description <<~EOS
           Save your jobsearch download key. The input stays hidden. The key goes into
-          `~/.config/jobsearch/download-key` (mode 600), and `brew install jobsearch` reads it.
+          `~/.config/jobsearch/download-key` (mode 600), and `brew install rutgoff/jobsearch-agent/jobsearch` reads it.
         EOS
         named_args :none
       end
@@ -30,7 +30,7 @@ module Homebrew
         file.dirname.mkpath
         file.open(File::WRONLY | File::CREAT | File::TRUNC, 0600) { |f| f.write("X-Jobsearch-Key: #{key}\n") }
         file.chmod(0600)
-        puts "Saved your download key. Next: brew install jobsearch"
+        puts "Saved your download key. Next: brew install rutgoff/jobsearch-agent/jobsearch"
       end
 
       private

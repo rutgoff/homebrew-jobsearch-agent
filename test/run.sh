@@ -79,7 +79,8 @@ expect "redirect: the other host gets no request" test ! -s "$work/other.log"
 
 make_home cmd
 key_file="$work/cmd/.config/jobsearch/download-key"
-printf '%s\n' "$VALID" | in_home cmd ruby test/key_command_check.rb >/dev/null
+out=$(printf '%s\n' "$VALID" | in_home cmd ruby test/key_command_check.rb)
+expect "key command: the next step names the full formula" grep -qF "Next: brew install rutgoff/jobsearch-agent/jobsearch" <<<"$out"
 expect "key command: the header line" test "$(cat "$key_file")" = "X-Jobsearch-Key: $VALID"
 expect "key command: mode 600" test "$(mode "$key_file")" = "0o600"
 
@@ -98,6 +99,11 @@ expect "README: tap, trust, key, install" test "$steps" = "brew tap,brew trust,b
 
 unpinned=$(grep -hE '^[[:space:]]*(- )?uses: ' .github/workflows/*.yml | grep -cvE '@[0-9a-f]{40}([[:space:]]|$)')
 expect "CI: every action pinned to a commit" test "$unpinned" -eq 0
+
+old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
+expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0
+short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
+expect "names: brew commands use the full formula name" test "$short" -eq 0
 
 # `brew style` on the whole tap also runs shellcheck --enable=all, shfmt, and actionlint; this script does not pass them.
 style=$(sed -n 's/^[[:space:]]*brew style //p' .github/workflows/tests.yml)

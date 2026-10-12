@@ -1,7 +1,7 @@
 """Checks that each installed package has the version that the release pinned.
 
 Run it with the Python of the formula:
-"$(brew --prefix jobsearch)/libexec/bin/python" test/check_pins.py "$(brew --cache jobsearch)"
+"$(brew --prefix rutgoff/jobsearch-agent/jobsearch)/libexec/bin/python" test/check_pins.py "$(brew --cache rutgoff/jobsearch-agent/jobsearch)"
 """
 
 import importlib.metadata
