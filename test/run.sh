@@ -102,6 +102,10 @@ expect "README: tap, trust, key, install" test "$steps" = "brew tap,brew trust,b
 unpinned=$(grep -hE '^[[:space:]]*(- )?uses: ' .github/workflows/*.yml | grep -cvE '@[0-9a-f]{40}([[:space:]]|$)')
 expect "CI: every action pinned to a commit" test "$unpinned" -eq 0
 
+expect "formula: keeps @rpath dylib IDs (prebuilt wheels lack header room)" grep -qE '^[[:space:]]*preserve_rpath$' Formula/jobsearch.rb
+expect "formula: no uv formula dependency (on Intel it builds Rust and LLVM)" test "$(grep -c 'depends_on "uv"' Formula/jobsearch.rb)" -eq 0
+expect "formula: the uv bootstrap checks hashes, wheels only" grep -qF -- '"--only-binary", ":all:", "--require-hashes"' Formula/jobsearch.rb
+
 old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0
 short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
