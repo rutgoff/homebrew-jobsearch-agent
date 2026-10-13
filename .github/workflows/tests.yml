@@ -52,7 +52,8 @@ jobs:
 
       - name: Install
         if: steps.release.outputs.found == 'yes'
-        run: brew install rutgoff/jobsearch-agent/jobsearch
+        # --overwrite: the Intel runner image has python.org Python and openssl@1.1 links in /usr/local/bin.
+        run: brew install --overwrite rutgoff/jobsearch-agent/jobsearch
 
       - name: Test
         if: steps.release.outputs.found == 'yes'

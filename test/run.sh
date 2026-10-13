@@ -111,6 +111,8 @@ pins_py='import importlib.util as u, sys; s = u.spec_from_file_location("p", "te
 expect "pin check: the Intel exception is allowed" test "$(python3 -I -c "$pins_py" x86_64 2>&1)" = "[]"
 expect "pin check: other Macs keep the pin" test "$(python3 -I -c "$pins_py" arm64 2>&1)" = "['cryptography 48.0.1 (pinned 50.0.2)']"
 
+expect "CI: the install overwrites foreign links of the runner image" grep -qF 'brew install --overwrite rutgoff/jobsearch-agent/jobsearch' .github/workflows/tests.yml
+
 old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0
 short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
