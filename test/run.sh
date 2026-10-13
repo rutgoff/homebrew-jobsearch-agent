@@ -117,8 +117,17 @@ order=no
 if [ "${clear_line:-0}" -gt 0 ] && [ "${install_line:-0}" -gt "${clear_line:-0}" ]; then order=yes; fi
 expect "CI: Intel clears the foreign links before the install (--overwrite covers only jobsearch)" test "$order" = yes
 expect "CI: the clear step runs only on Intel macOS" grep -qF "runner.os == 'macOS' && runner.arch == 'X64'" .github/workflows/tests.yml
-expect "CI: the clear step unlinks openssl@1.1" grep -qF 'brew unlink openssl@1.1' .github/workflows/tests.yml
-expect "CI: the clear step deletes only python.org links" grep -qF "find /usr/local/bin -maxdepth 1 -lname '/Library/Frameworks/Python.framework/*'" .github/workflows/tests.yml
+clear_find="find /usr/local/bin -maxdepth 1 \\( -lname '*/Library/Frameworks/Python.framework/*' -o -lname '*/opt/openssl@1.1/*' \\) -print -delete"
+expect "CI: the clear step deletes only the python.org and openssl@1.1 links" grep -qF "$clear_find" .github/workflows/tests.yml
+expect "CI: no brew unlink (the image made the openssl@1.1 link by hand)" test "$(grep -cE '^[[:space:]]*(run: )?brew unlink' .github/workflows/tests.yml)" -eq 0
+links=$(mktemp -d)
+ln -s ../../../Library/Frameworks/Python.framework/Versions/3.12/bin/2to3-3.12 "$links/2to3-3.12"
+ln -s /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 "$links/python3.12"
+ln -s /usr/local/opt/openssl@1.1/bin/openssl "$links/openssl"
+ln -s ../Cellar/git/2.51.0/bin/git "$links/git"
+eval "${clear_find//\/usr\/local\/bin/\"\$links\"}" >/dev/null
+expect "CI: the clear command keeps other links" test "$(find "$links" -type l | wc -l | tr -d ' ')" -eq 1 -a -L "$links/git"
+rm -rf "$links"
 
 old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0

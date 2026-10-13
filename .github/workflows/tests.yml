@@ -52,11 +52,9 @@ jobs:
 
       - name: Clear the foreign links of the Intel runner image
         if: steps.release.outputs.found == 'yes' && runner.os == 'macOS' && runner.arch == 'X64'
-        # The image links openssl@1.1 and python.org Python into /usr/local/bin, so the links of the
-        # openssl@3 and python@3.12 upgrades fail; `brew install --overwrite` covers only jobsearch.
-        run: |
-          brew unlink openssl@1.1 || true
-          find /usr/local/bin -maxdepth 1 -lname '/Library/Frameworks/Python.framework/*' -print -delete
+        # The image links openssl@1.1 (by hand, so `brew unlink` skips it) and python.org Python (relative
+        # links) into /usr/local/bin, so the links of the openssl@3 and python@3.12 upgrades fail.
+        run: find /usr/local/bin -maxdepth 1 \( -lname '*/Library/Frameworks/Python.framework/*' -o -lname '*/opt/openssl@1.1/*' \) -print -delete
 
       - name: Install
         if: steps.release.outputs.found == 'yes'
