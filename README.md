@@ -6,7 +6,7 @@
 
 - A Mac (Apple silicon or Intel) or a Linux computer.
 - Your download key from Rowena: 32 letters, digits, `-` or `_`.
-- About 10 minutes and 2 GB of free disk space.
+- About 10 minutes and 2 GB of free disk space. On an Intel Mac, allow 30 minutes or more: Homebrew can build Python from source there.
 
 ## Install
 
