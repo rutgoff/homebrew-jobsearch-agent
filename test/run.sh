@@ -111,7 +111,14 @@ pins_py='import importlib.util as u, sys; s = u.spec_from_file_location("p", "te
 expect "pin check: the Intel exception is allowed" test "$(python3 -I -c "$pins_py" x86_64 2>&1)" = "[]"
 expect "pin check: other Macs keep the pin" test "$(python3 -I -c "$pins_py" arm64 2>&1)" = "['cryptography 48.0.1 (pinned 50.0.2)']"
 
-expect "CI: the install overwrites foreign links of the runner image" grep -qF 'brew install --overwrite rutgoff/jobsearch-agent/jobsearch' .github/workflows/tests.yml
+clear_line=$(grep -n 'name: Clear the foreign links of the Intel runner image' .github/workflows/tests.yml | cut -d: -f1)
+install_line=$(grep -n 'run: brew install rutgoff/jobsearch-agent/jobsearch$' .github/workflows/tests.yml | cut -d: -f1)
+order=no
+if [ "${clear_line:-0}" -gt 0 ] && [ "${install_line:-0}" -gt "${clear_line:-0}" ]; then order=yes; fi
+expect "CI: Intel clears the foreign links before the install (--overwrite covers only jobsearch)" test "$order" = yes
+expect "CI: the clear step runs only on Intel macOS" grep -qF "runner.os == 'macOS' && runner.arch == 'X64'" .github/workflows/tests.yml
+expect "CI: the clear step unlinks openssl@1.1" grep -qF 'brew unlink openssl@1.1' .github/workflows/tests.yml
+expect "CI: the clear step deletes only python.org links" grep -qF "find /usr/local/bin -maxdepth 1 -lname '/Library/Frameworks/Python.framework/*'" .github/workflows/tests.yml
 
 old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0

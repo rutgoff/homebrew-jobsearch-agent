@@ -50,10 +50,17 @@ jobs:
           JOBSEARCH_CI_KEY: ${{ secrets.JOBSEARCH_CI_KEY }}
         run: printf '%s\n' "$JOBSEARCH_CI_KEY" | brew jobsearch-key
 
+      - name: Clear the foreign links of the Intel runner image
+        if: steps.release.outputs.found == 'yes' && runner.os == 'macOS' && runner.arch == 'X64'
+        # The image links openssl@1.1 and python.org Python into /usr/local/bin, so the links of the
+        # openssl@3 and python@3.12 upgrades fail; `brew install --overwrite` covers only jobsearch.
+        run: |
+          brew unlink openssl@1.1 || true
+          find /usr/local/bin -maxdepth 1 -lname '/Library/Frameworks/Python.framework/*' -print -delete
+
       - name: Install
         if: steps.release.outputs.found == 'yes'
-        # --overwrite: the Intel runner image has python.org Python and openssl@1.1 links in /usr/local/bin.
-        run: brew install --overwrite rutgoff/jobsearch-agent/jobsearch
+        run: brew install rutgoff/jobsearch-agent/jobsearch
 
       - name: Test
         if: steps.release.outputs.found == 'yes'
