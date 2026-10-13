@@ -17,11 +17,16 @@ class Jobsearch < Formula
     python = formula_opt_bin("python@3.12")/"python3.12"
     wheel = buildpath/"job_search_agent-#{version}-py3-none-any.whl"
     constraints = buildpath/"constraints.txt"
-    constraints.write Utils.safe_popen_read(python, "-c", <<~PYTHON, wheel)
+    pins = Utils.safe_popen_read(python, "-c", <<~PYTHON, wheel)
       import sys, zipfile
       data = zipfile.ZipFile(sys.argv[1]).read("job_search_agent/release_constraints.txt")
       sys.stdout.write(data.decode())
     PYTHON
+    if OS.mac? && Hardware::CPU.intel?
+      # cryptography 49 and later ship no Intel macOS wheel; 48.0.1 is the last one.
+      pins = pins.lines.grep_v(/\Acryptography==/).join + "cryptography==48.0.1\n"
+    end
+    constraints.write pins
     overrides = buildpath/"overrides.txt"
     overrides.write <<~EOS
       lancedb; sys_platform == 'never'

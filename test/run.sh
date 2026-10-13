@@ -106,6 +106,11 @@ expect "formula: keeps @rpath dylib IDs (prebuilt wheels lack header room)" grep
 expect "formula: no uv formula dependency (on Intel it builds Rust and LLVM)" test "$(grep -c 'depends_on "uv"' Formula/jobsearch.rb)" -eq 0
 expect "formula: the uv bootstrap checks hashes, wheels only" grep -qF -- '"--only-binary", ":all:", "--require-hashes"' Formula/jobsearch.rb
 
+expect "formula: Intel Macs get cryptography 48.0.1 (no Intel wheel from 49 on)" grep -qF 'cryptography==48.0.1' Formula/jobsearch.rb
+pins_py='import importlib.util as u, sys; s = u.spec_from_file_location("p", "test/check_pins.py"); m = u.module_from_spec(s); s.loader.exec_module(m); print(m.wrong_pins({"cryptography": "50.0.2"}, {"cryptography": "48.0.1"}, "darwin", sys.argv[1]))'
+expect "pin check: the Intel exception is allowed" test "$(python3 -I -c "$pins_py" x86_64 2>&1)" = "[]"
+expect "pin check: other Macs keep the pin" test "$(python3 -I -c "$pins_py" arm64 2>&1)" = "['cryptography 48.0.1 (pinned 50.0.2)']"
+
 old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0
 short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
