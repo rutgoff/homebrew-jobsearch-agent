@@ -32,7 +32,7 @@
 
 4. Check the install: `jobsearch version` shows the version.
 
-Then set up the app with the guide that Rowena sends you.
+Then set up the app with the tester guide: [GUIDE.md](GUIDE.md).
 
 ## Update
 

@@ -129,10 +129,11 @@ eval "${clear_find//\/usr\/local\/bin/\"\$links\"}" >/dev/null
 expect "CI: the clear command keeps other links" test "$(find "$links" -type l | wc -l | tr -d ' ')" -eq 1 -a -L "$links/git"
 rm -rf "$links"
 
-old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
+old_tap=$(grep -rnE 'rutgoff/jobsearch([^-]|$)' README.md GUIDE.md cmd lib Formula .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: no file names the old tap rutgoff/jobsearch" test "$old_tap" -eq 0
-short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
+short=$(grep -rnE 'brew (install|upgrade|uninstall|test|--prefix|--cache) jobsearch([^-]|$)' README.md GUIDE.md cmd .github test/check_pins.py | wc -l | tr -d ' ')
 expect "names: brew commands use the full formula name" test "$short" -eq 0
+expect "README: the last step links the tester guide" grep -qF "[GUIDE.md](GUIDE.md)" README.md
 
 # `brew style` on the whole tap also runs shellcheck --enable=all, shfmt, and actionlint; this script does not pass them.
 style=$(sed -n 's/^[[:space:]]*brew style //p' .github/workflows/tests.yml)
