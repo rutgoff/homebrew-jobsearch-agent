@@ -70,6 +70,7 @@ rm ~/.config/jobsearch/download-key
 |---|---|
 | `No download key. Ask Rowena for your key, then run: brew jobsearch-key` | Run `brew jobsearch-key` and paste your key. |
 | `Your download key was refused. Ask Rowena for a new key.` | If you got the key less than 1 minute ago, wait 1 minute and run the install again: a new key needs up to 1 minute to work. If it still fails, ask Rowena for a new key. Then run `brew jobsearch-key` again. |
+| `Your download key is good, but the server has no file for this version. Tell Rowena.` | Send Rowena the last 20 lines of the Terminal output. Do not ask for a new key: your key works. |
 | `Refusing to load ... from untrusted tap rutgoff/jobsearch-agent` | Run `brew trust rutgoff/jobsearch-agent`. |
 | `The brew link step did not complete successfully` (for python@3.12 or openssl@3) | jobsearch still works: it does not need those links. Another Python or openssl owns the files. Check with `jobsearch version`. |
 | `That is not a download key.` | Copy the full key again: 32 characters, no spaces. |
