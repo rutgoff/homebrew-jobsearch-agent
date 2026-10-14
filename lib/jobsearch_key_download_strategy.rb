@@ -9,6 +9,7 @@ class JobsearchKeyDownloadStrategy < NoUnzipCurlDownloadStrategy
   KEY_LINE = /\AX-Jobsearch-Key: [A-Za-z0-9_-]{32}\n?\z/
   NO_KEY = "No download key. Ask Rowena for your key, then run: brew jobsearch-key"
   REFUSED = "Your download key was refused. Ask Rowena for a new key."
+  MISSING = "Your download key is good, but the server has no file for this version. Tell Rowena."
 
   sig { returns(Pathname) }
   def self.key_file = Pathname(Dir.home)/".config/jobsearch/download-key"
@@ -27,7 +28,9 @@ class JobsearchKeyDownloadStrategy < NoUnzipCurlDownloadStrategy
     begin
       super
     rescue CurlDownloadStrategyError => e
-      raise CurlDownloadStrategyError.new(url, REFUSED) if e.message.match?(/returned error: 403\b/)
+      # The edge answers a bad key with 401; S3 answers a missing file with 403 (no s3:ListBucket) or 404.
+      raise CurlDownloadStrategyError.new(url, REFUSED) if e.message.match?(/returned error: 401\b/)
+      raise CurlDownloadStrategyError.new(url, MISSING) if e.message.match?(/returned error: 40[34]\b/)
 
       raise
     end

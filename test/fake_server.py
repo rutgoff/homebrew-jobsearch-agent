@@ -1,4 +1,5 @@
-"""Stands in for the edge check: GET /jobsearch/* with the valid key gets a file; all else gets 403."""
+"""Stands in for the edge check and S3: GET /jobsearch/* with the valid key gets the file (403 or 404 for a missing one);
+the same GET without the valid key gets 401; any other request gets 403."""
 
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -11,11 +12,8 @@ BODY = b"PK\x03\x04 test file"
 class Handler(BaseHTTPRequestHandler):
     def answer(self, send_body):
         key = self.headers.get("X-Jobsearch-Key")
-        ok = (
-            self.command == "GET"
-            and self.path.startswith("/jobsearch/")
-            and key == VALID
-        )
+        download = self.command == "GET" and self.path.startswith("/jobsearch/")
+        ok = download and key == VALID
         with open(LOG, "a", encoding="utf-8") as log:
             log.write(
                 f"{self.command} {self.path} {'valid' if key == VALID else 'refused'}\n"
@@ -26,9 +24,18 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", "0")
             self.end_headers()
             return
-        status = (500 if "broken" in self.path else 200) if ok else 403
+        if not download:
+            status = 403
+        elif not ok:
+            status = 401
+        elif "missing" in self.path:  # S3 answers a missing file with 403 (no s3:ListBucket) or 404
+            status = 404 if "404" in self.path else 403
+        else:
+            status = 500 if "broken" in self.path else 200
         payload = BODY if status == 200 else b"Error"
         self.send_response(status)
+        if status == 401:
+            self.send_header("WWW-Authenticate", "X-Jobsearch-Key")
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         if send_body:

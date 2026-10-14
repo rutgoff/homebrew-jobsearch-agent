@@ -8,6 +8,7 @@ VALID="AAAAAAAAAAAAAAAAbbbbbbbb_-_-_-_-"
 WRONG="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 NO_KEY="No download key. Ask Rowena for your key, then run: brew jobsearch-key"
 REFUSED="Your download key was refused. Ask Rowena for a new key."
+MISSING="Your download key is good, but the server has no file for this version. Tell Rowena."
 
 work=$(mktemp -d)
 python3 -I test/fake_server.py 8765 "$VALID" "$work/server.log" "http://127.0.0.1:8766/jobsearch/other.whl" &
@@ -76,6 +77,12 @@ REDIRECT="http://127.0.0.1:8765/jobsearch/job_search_agent-1.2.0-redirect-py3-no
 out=$(in_home valid ruby test/fetch_check.rb "$REDIRECT")
 expect "redirect: the download stops" grep -qF "Maximum (0) redirects followed" <<<"$out"
 expect "redirect: the other host gets no request" test ! -s "$work/other.log"
+
+for code in 403 404; do # S3 answers a missing file with 403 (no s3:ListBucket) or 404; the edge answers a bad key with 401
+  out=$(in_home valid ruby test/fetch_check.rb "http://127.0.0.1:8765/jobsearch/job_search_agent-1.2.0-missing$code-py3-none-any.whl")
+  expect "missing file ($code): the message" grep -qF "$MISSING" <<<"$out"
+  expect "missing file ($code): not the refused message" test "$(grep -cF "$REFUSED" <<<"$out")" -eq 0
+done
 
 make_home cmd
 key_file="$work/cmd/.config/jobsearch/download-key"
