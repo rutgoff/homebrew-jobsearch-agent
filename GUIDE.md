@@ -6,11 +6,21 @@ This guide is for the closed test. Do the steps in order. The first setup takes 
 
 ## What you need
 
-- A Mac with [Homebrew](https://brew.sh), or Linux with Homebrew.
-- A Claude plan: Pro, Max, or Team. jobsearch uses your plan for its writing and ranking.
-- Your resume as a PDF, a DOCX, or a text file.
-- Optional: a personal Gmail address that gets LinkedIn job alerts.
-- Your download key from Rowena.
+You need these things to use jobsearch:
+
+1. A Mac (Apple silicon or Intel) or a Linux computer. Windows is not part of this test. Linux in WSL 2 can work, but nobody has tested it yet.
+2. [Homebrew](https://brew.sh). Homebrew installs jobsearch and the Python that it needs.
+3. A download key from Rowena: 32 letters, digits, `-` or `_`. She sends it to you in a private message. The key is for you only.
+4. A Claude plan that includes Claude Code, for example Pro, Max, or Team. jobsearch uses your plan through Claude Code, with your own sign-in. Do not share your sign-in.
+5. Your resume as a PDF, a DOCX, or a text file (`.txt` or `.md`).
+6. git, pandoc, and Google Chrome (on Linux, Chromium also works). git keeps your resume files. pandoc and Chrome make the PDF of your resume. Step 3 shows how to install them.
+7. About 30 minutes and 4 GB of free disk space for the first setup. On an Intel Mac, allow 20 minutes more: Homebrew can build Python from source there.
+
+These items are optional:
+
+- A personal Gmail address that gets LinkedIn job alerts. jobsearch reads the alerts with an app password, with read access only. Your Google account needs 2-Step Verification for the app password.
+- Adzuna API keys: an App ID and an API key. [Sign up for free](https://developer.adzuna.com/). With the keys, jobsearch can also search the Adzuna job API.
+- An [Exa](https://exa.ai/) API key. With the key, jobsearch looks for the employer's posting by itself, with at most 40 Exa searches a day. Without the key, you add the link or the text of the posting yourself.
 
 ## 1. Install jobsearch
 
@@ -122,6 +132,34 @@ A tailored resume needs the text of the employer's posting. A LinkedIn alert giv
 - press `u` and paste the link of the employer's posting (jobsearch reads that page), or
 - press `e` and paste the text of the job description.
 
+Optional: with an [Exa](https://exa.ai/) API key, jobsearch looks for the posting by itself after each LinkedIn sync and each search, with at most 40 Exa searches a day. Store the key. The command asks for the key and does not show it:
+
+```bash
+jobsearch secrets set EXA_API_KEY
+```
+
+### Optional: an Adzuna search
+
+jobsearch can also search the Adzuna job API.
+
+1. Sign up for free at [developer.adzuna.com](https://developer.adzuna.com/). Get an App ID and an API key.
+2. Store the 2 keys. Each command asks for 1 key and does not show it:
+
+   ```bash
+   jobsearch secrets set ADZUNA_APP_ID
+   jobsearch secrets set ADZUNA_API_KEY
+   ```
+
+3. Run a search. The command asks what to search for:
+
+   ```bash
+   jobsearch search
+   ```
+
+   In the job list (step 5), `s` also starts a search.
+
+A search also writes a report with a learning plan for your skill gaps, interview questions, and career advice. Adzuna gives only the start of each job description, so add the posting text as for an alert job (above).
+
 ## 5. Daily use
 
 Open the job list:
@@ -170,6 +208,7 @@ brew update && brew upgrade rutgoff/jobsearch-agent/jobsearch
   - the job data is in `~/.local/share/jobsearch/`;
   - your documents are in `~/Documents/Jobsearch/`.
 - When jobsearch uses Claude, it sends your resume text, the job text, and your answers to your own Claude plan. No other service gets them.
+- With the optional keys, jobsearch sends your search words to Adzuna. Exa gets only the job title and the company.
 - Rowena gets nothing from jobsearch. She sees only what you send her.
 - Your Gmail app password is in your Mac's Keychain (on Linux: the Secret Service).
 - Your download key is only for downloads of jobsearch. Do not share it.
