@@ -26,7 +26,7 @@ jobs:
       - name: Style and audit
         # Ruby only: `brew style rutgoff/jobsearch-agent` also runs shellcheck --enable=all on test/run.sh.
         run: |
-          brew style lib cmd Formula test/fetch_check.rb test/key_command_check.rb
+          brew style lib cmd Formula test/fetch_check.rb test/key_command_check.rb test/keg_copy_check.rb
           brew audit --strict --tap=rutgoff/jobsearch-agent
 
       - name: Check the download and the key command (fake server, no AWS)

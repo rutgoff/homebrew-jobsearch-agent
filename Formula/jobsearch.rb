@@ -1,4 +1,5 @@
-require_relative "../lib/jobsearch_key_download_strategy"
+# The tap path, not this file's folder: Homebrew also loads the copy of this file in the keg.
+require (Tap.fetch("rutgoff", "jobsearch-agent").path/"lib/jobsearch_key_download_strategy").to_s
 
 class Jobsearch < Formula
   desc "AI assistant that finds, scores, and tracks job postings"

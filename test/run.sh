@@ -110,6 +110,11 @@ unpinned=$(grep -hE '^[[:space:]]*(- )?uses: ' .github/workflows/*.yml | grep -c
 expect "CI: every action pinned to a commit" test "$unpinned" -eq 0
 
 expect "formula: keeps @rpath dylib IDs (prebuilt wheels lack header room)" grep -qE '^[[:space:]]*preserve_rpath$' Formula/jobsearch.rb
+mkdir -p "$work/keg/.brew"
+cp Formula/jobsearch.rb "$work/keg/.brew/jobsearch.rb"
+# HOMEBREW_DEVELOPER lets Homebrew load a formula file outside a tap or the Cellar.
+out=$(HOMEBREW_DEVELOPER=1 HOMEBREW_NO_AUTO_UPDATE=1 brew ruby test/keg_copy_check.rb "$work/keg/.brew/jobsearch.rb" 2>&1)
+expect "formula: the keg copy loads and keeps preserve_rpath (Homebrew reads it there)" test "$out" = "preserve_rpath true"
 expect "formula: no uv formula dependency (on Intel it builds Rust and LLVM)" test "$(grep -c 'depends_on "uv"' Formula/jobsearch.rb)" -eq 0
 expect "formula: the uv bootstrap checks hashes, wheels only" grep -qF -- '"--only-binary", ":all:", "--require-hashes"' Formula/jobsearch.rb
 
@@ -144,7 +149,7 @@ expect "README: the last step links the tester guide" grep -qF "[GUIDE.md](GUIDE
 
 # `brew style` on the whole tap also runs shellcheck --enable=all, shfmt, and actionlint; this script does not pass them.
 style=$(sed -n 's/^[[:space:]]*brew style //p' .github/workflows/tests.yml)
-expect "CI: brew style gets only the Ruby paths" test "$style" = "lib cmd Formula test/fetch_check.rb test/key_command_check.rb"
+expect "CI: brew style gets only the Ruby paths" test "$style" = "lib cmd Formula test/fetch_check.rb test/key_command_check.rb test/keg_copy_check.rb"
 
 echo "$passed passed, $failed failed"
 test "$failed" -eq 0
