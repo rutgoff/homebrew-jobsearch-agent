@@ -3,9 +3,9 @@ require_relative "../lib/jobsearch_key_download_strategy"
 class Jobsearch < Formula
   desc "AI assistant that finds, scores, and tracks job postings"
   homepage "https://github.com/rutgoff/job-search-agent-preview"
-  url "https://software.utgoff.org/jobsearch/job_search_agent-1.5.0-py3-none-any.whl",
+  url "https://software.utgoff.org/jobsearch/job_search_agent-1.6.0-py3-none-any.whl",
       using: JobsearchKeyDownloadStrategy
-  sha256 "23b1f34c7b06432c139cf0b017370f5b871142ba0176b3bee65f93bb2acb5a10"
+  sha256 "92a9c3a5a995d8e5b7969165cebac64e185ad2db3c9984c6efafe6cd92be08ef"
   license "MIT"
 
   depends_on "python@3.12"
